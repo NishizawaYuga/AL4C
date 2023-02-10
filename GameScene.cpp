@@ -4,6 +4,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include "Collision.h"
+
 using namespace DirectX;
 
 GameScene::GameScene()
@@ -15,10 +17,12 @@ GameScene::~GameScene()
 	delete spriteBG;
 	delete objSkydome;
 	delete objGround;
-	delete objFighter;
+	delete objSphere;
+	delete objFloor;
 	delete modelSkydome;
 	delete modelGround;
-	delete modelFighter;
+	delete modelSphere;
+	delete modelFloor;
 	delete camera;
 }
 
@@ -54,18 +58,21 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	// 3Dオブジェクト生成
 	objSkydome = Object3d::Create();
 	objGround = Object3d::Create();
-	objFighter = Object3d::Create();
+	objSphere = Object3d::Create();
+	objFloor = Object3d::Create();
 
 	// テクスチャ2番に読み込み
 	Sprite::LoadTexture(2, L"Resources/texture.png");
 
 	modelSkydome = Model::CreateFromOBJ("skydome");
 	modelGround = Model::CreateFromOBJ("ground");
-	modelFighter = Model::CreateFromOBJ("chr_sword");
+	modelSphere = Model::CreateFromOBJ("sphere1");
+	modelFloor = Model::CreateFromOBJ("floor");
 
 	objSkydome->SetModel(modelSkydome);
 	objGround->SetModel(modelGround);
-	objFighter->SetModel(modelFighter);
+	objSphere->SetModel(modelSphere);
+	objFloor->SetModel(modelFloor);
 }
 
 void GameScene::Update()
@@ -74,11 +81,40 @@ void GameScene::Update()
 
 	objSkydome->Update();
 	objGround->Update();
-	objFighter->Update();
+	objSphere->Update();
+	objFloor->Update();
 
 	debugText.Print("AD: move camera LeftRight", 50, 50, 1.0f);
 	debugText.Print("WS: move camera UpDown", 50, 70, 1.0f);
 	debugText.Print("ARROW: move camera FrontBack", 50, 90, 1.0f);
+
+	//球と平面の当たり判定
+	bool hit = Collision::CheckSphere2Plane(sphere, plane);
+	if (hit) {
+		debugText.Print("HIT", 50, 200, 1.0f);
+	}
+
+	//球移動
+	{
+		XMVECTOR moveY = XMVectorSet(0, 0.01f, 0, 0);
+		if (input->PushKey(DIK_S)) { sphere.center += moveY; }
+		else if (input->PushKey(DIK_W)) { sphere.center -= moveY; }
+
+		XMVECTOR moveX = XMVectorSet(0.01f, 0, 0, 0);
+		if (input->PushKey(DIK_A)) { sphere.center += moveX; }
+		else if (input->PushKey(DIK_D)) { sphere.center -= moveX; }
+
+		objSphere->SetPosition(XMFLOAT3(moveX.m128_f32[0], moveY.m128_f32[0], 0));
+	}
+	//stringstreamで変数の値を埋め込んで整形する
+	std::ostringstream spherestr;
+	spherestr << "Sphere:("
+		<< std::fixed << std::setprecision(2)	//小数点以下2桁まで
+		<< sphere.center.m128_f32[0] << ","	//x
+		<< sphere.center.m128_f32[1] << ","	//y
+		<< sphere.center.m128_f32[2] << ")";//z
+
+	debugText.Print(spherestr.str(), 50, 180, 1.0f);
 }
 
 void GameScene::Draw()
@@ -109,7 +145,8 @@ void GameScene::Draw()
 	// 3Dオブクジェクトの描画
 	objSkydome->Draw();
 	objGround->Draw();
-	objFighter->Draw();
+	objSphere->Draw();
+	//objFloor->Draw();
 
 	/// <summary>
 	/// ここに3Dオブジェクトの描画処理を追加できる

@@ -8,6 +8,8 @@
 #include "Sprite.h"
 #include <DirectXMath.h>
 
+#include "CollisionPrimitive.h"
+
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -63,9 +65,18 @@ class GameScene {
 
 	Model* modelSkydome = nullptr;
 	Model* modelGround = nullptr;
-	Model* modelFighter = nullptr;
+	Model* modelSphere = nullptr;
+	Model* modelFloor = nullptr;
 
 	Object3d* objSkydome = nullptr;
 	Object3d* objGround = nullptr;
-	Object3d* objFighter = nullptr;
+	Object3d* objSphere = nullptr;
+	Object3d* objFloor = nullptr;
+
+
+
+	//当たり判定球
+	Sphere sphere;
+	//当たり判定平面
+	Plane plane;
 };

@@ -8,6 +8,7 @@
 #include <string>
 #include "Model.h"
 #include "Camera.h"
+#include "Input.h"
 
 /// <summary>
 /// 3Dオブジェクト
@@ -129,6 +130,8 @@ public: // メンバ関数
 
 	void SetBillboard(bool isBillboard) { this->isBillboard = isBillboard; }
 
+	void Move();
+
 private: // メンバ変数
 	ComPtr<ID3D12Resource> constBuffB0; // 定数バッファ
 	// 色
@@ -149,5 +152,7 @@ private: // メンバ変数
 	bool isBillboard = false;
 	// 定数バッファのマップ
 	ConstBufferDataB0* constMap = nullptr;
+
+	Input* input = nullptr;
 };
 
