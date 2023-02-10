@@ -59,6 +59,7 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	objSkydome = Object3d::Create();
 	objGround = Object3d::Create();
 	objSphere = Object3d::Create();
+	objSphere2 = Object3d::Create();
 	objFloor = Object3d::Create();
 
 	// テクスチャ2番に読み込み
@@ -67,11 +68,13 @@ void GameScene::Initialize(DirectXCommon* dxCommon, Input* input)
 	modelSkydome = Model::CreateFromOBJ("skydome");
 	modelGround = Model::CreateFromOBJ("ground");
 	modelSphere = Model::CreateFromOBJ("sphere1");
+	modelSphere2 = Model::CreateFromOBJ("sphere2");
 	modelFloor = Model::CreateFromOBJ("floor");
 
 	objSkydome->SetModel(modelSkydome);
 	objGround->SetModel(modelGround);
 	objSphere->SetModel(modelSphere);
+	objSphere2->SetModel(modelSphere2);
 	objFloor->SetModel(modelFloor);
 }
 
@@ -82,6 +85,7 @@ void GameScene::Update()
 	objSkydome->Update();
 	objGround->Update();
 	objSphere->Update();
+	objSphere2->Update();
 	objFloor->Update();
 
 	debugText.Print("AD: move camera LeftRight", 50, 50, 1.0f);
@@ -96,18 +100,19 @@ void GameScene::Update()
 
 	//球移動
 	{
-		XMVECTOR moveY = XMVectorSet(0, 0.01f, 0, 0);
+		XMVECTOR moveY = XMVectorSet(0, 0.05f, 0, 0);
 		if (input->PushKey(DIK_S)) { 
 			sphere.center += moveY; 
 
 		}
 		else if (input->PushKey(DIK_W)) { sphere.center -= moveY; }
 
-		XMVECTOR moveX = XMVectorSet(0.01f, 0, 0, 0);
+		XMVECTOR moveX = XMVectorSet(0.05f, 0, 0, 0);
 		if (input->PushKey(DIK_A)) { sphere.center += moveX; }
 		else if (input->PushKey(DIK_D)) { sphere.center -= moveX; }
 
 		objSphere->SetPosition(XMFLOAT3(sphere.center.m128_f32[0], sphere.center.m128_f32[1], sphere.center.m128_f32[2]));
+		objSphere2->SetPosition(XMFLOAT3(sphere.center.m128_f32[0], sphere.center.m128_f32[1], sphere.center.m128_f32[2]));
 	}
 	//stringstreamで変数の値を埋め込んで整形する
 	std::ostringstream spherestr;
@@ -148,7 +153,13 @@ void GameScene::Draw()
 	// 3Dオブクジェクトの描画
 	objSkydome->Draw();
 	objGround->Draw();
-	objSphere->Draw();
+	bool hit = Collision::CheckSphere2Plane(sphere, plane);
+	if (hit) {
+		objSphere2->Draw();
+	}
+	else {
+		objSphere->Draw();
+	}
 	//objFloor->Draw();
 
 	/// <summary>
